@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-11-25)
 
 **Core value:** Deterministic, policy-compliant pod bin-packing in under 3 seconds per solve, running within a $0 / 512 MB RAM single-backend deployment.
-**Current focus:** Phase 1 — Foundation, Project Scaffold & Telemetry Simulator
+**Current focus:** Phase 2 — OR-Tools CP-SAT Bin-Packing Engine
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation, Project Scaffold & Telemetry Simulator)
+Phase: 2 of 6 (OR-Tools CP-SAT Bin-Packing Engine)
 Plan: 0 of 2 in current phase
-Status: Ready to execute Phase 1 (01-01 & 01-02 planned)
-Last activity: 2026-11-25 — Planned Phase 1 (2 waves) + added 1M-scale Protocol seams to ARCHITECTURE.md
+Status: Ready to execute Phase 2 (02-01 & 02-02 planned)
+Last activity: 2026-11-25 — Planned Phase 2 (02-01 & 02-02)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 17%
 
 ## Performance Metrics
 
