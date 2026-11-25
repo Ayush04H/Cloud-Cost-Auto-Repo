@@ -19,12 +19,16 @@ A 6-phase, ~30–45 day build plan taking **CloudCost-Autopilot** from an empty 
 **Goal**: Establish the monorepo structure, strict coding/linting rules, lean Pydantic domain models, AWS EC2 pricing catalog, and a realistic 500-pod / 35-node naive `kube-scheduler` baseline simulator.
 **Estimated Time**: 4–5 days
 **Depends on**: Nothing (first phase)
-**Requirements**: [REQ-01, REQ-02, SOLV-01]
+**Requirements**: [REQ-01, REQ-02, SOLV-01, SCALE-01]
 **Success Criteria** (what must be TRUE):
   1. `uvicorn app.main:app` starts cleanly in `< 2s` with `< 65 MB` idle RSS and `/health` returns `200 OK`.
   2. Simulator deterministically generates 500 pods + 35 heterogeneous nodes (`c5`, `m5`, `c6g`, Spot/On-Demand) and computes the naive `kube-scheduler` placement + monthly baseline cost.
   3. React 18 + Vite + Tailwind + TypeScript frontend builds cleanly and proxies `/api` to FastAPI locally.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01: Monorepo scaffold, Protocol seams (JobBus, BlobStore, RateLimiter), FastAPI health, React 18 shell
+- [ ] 01-02: Lean Pydantic domain models, EC2 micro-dollar catalog, 500-pod simulator & naive baseline
 
 ### Phase 2: OR-Tools CP-SAT Bin-Packing Engine
 **Goal**: Build the deterministic CP-SAT optimization engine with variable pre-pruning, integer micro-dollar arithmetic, $O(N)$ anti-affinity grouping, and dynamic `ClusterPolicy` enforcement.

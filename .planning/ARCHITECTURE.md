@@ -54,8 +54,9 @@ cloudcost-autopilot/
 │   │   ├── main.py                  # FastAPI lifespan, CORS, routers
 │   │   ├── core/
 │   │   │   ├── config.py            # Pydantic BaseSettings (env vars, limits)
+│   │   │   ├── protocols.py         # JobBus, BlobStore, RateLimiter Protocols (0->1M seam)
 │   │   │   ├── cache.py             # TTLCache for EC2 rates, policies, jobs
-│   │   │   └── rate_limit.py        # Lightweight in-memory token bucket
+│   │   │   └── rate_limit.py        # InMemoryRateLimiter (swappable to Redis)
 │   │   ├── domain/
 │   │   │   ├── schemas.py           # PodSpec, NodeSpec, ClusterPolicy, PackingResult
 │   │   │   └── pricing.py           # AWS EC2 catalog (c5, m5, c6g) in micro-USD
@@ -86,9 +87,15 @@ cloudcost-autopilot/
 ```
 
 ### B. Database Schema (Neon Postgres)
-- `clusters` (`id UUID PK`, `name TEXT`, `pod_count INT`, `node_count INT`, `snapshot_json JSONB`, `created_at TIMESTAMPTZ`)
+- `clusters` (`id UUID PK`, `tenant_id TEXT NOT NULL DEFAULT 'demo'`, `name TEXT`, `pod_count INT`, `node_count INT`, `snapshot_uri TEXT` or `snapshot_json JSONB`, `created_at TIMESTAMPTZ`) — indexed on `(tenant_id, created_at DESC)`
 - `policies` (`prompt_hash CHAR(64) PK`, `raw_prompt TEXT`, `compiled_json JSONB`, `source TEXT` [`gemini`|`fallback`], `created_at TIMESTAMPTZ`)
-- `optimization_runs` (`id UUID PK`, `cluster_id UUID FK`, `policy_hash CHAR(64)`, `status TEXT`, `baseline_monthly_usd NUMERIC(10,2)`, `optimized_monthly_usd NUMERIC(10,2)`, `savings_pct NUMERIC(5,2)`, `solve_ms INT`, `solver_status TEXT`, `result_json JSONB`, `created_at TIMESTAMPTZ`)
+- `optimization_runs` (`id UUID PK`, `tenant_id TEXT NOT NULL DEFAULT 'demo'`, `cluster_id UUID FK`, `policy_hash CHAR(64)`, `status TEXT`, `baseline_monthly_usd NUMERIC(10,2)`, `optimized_monthly_usd NUMERIC(10,2)`, `savings_pct NUMERIC(5,2)`, `solve_ms INT`, `solver_status TEXT`, `result_uri TEXT` or `result_json JSONB`, `created_at TIMESTAMPTZ`) — indexed on `(tenant_id, cluster_id, created_at DESC)`
+
+### B2. Scale-Out Protocol Seams ($0 -> 1M Users)
+All infrastructure boundaries are defined as Python `typing.Protocol` interfaces in `backend/app/core/protocols.py`:
+- `JobBus`: `enqueue(job)` / `publish(job_id, event)` / `subscribe(job_id)` (`InMemoryJobBus` for $0 -> `SQS + RedisPubSub` at scale)
+- `BlobStore`: `put_json(key, payload)` / `get_json(key)` (`PostgresBlobStore` for $0 -> `S3BlobStore` at scale)
+- `RateLimiter`: `allow(tenant_id)` (`InMemoryRateLimiter` for $0 -> `RedisRateLimiter` at scale)
 
 ### C. Core API Contracts
 - `GET /api/v1/health` -> `{"status": "ok", "rss_mb": 74.2}`

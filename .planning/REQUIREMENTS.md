@@ -18,6 +18,7 @@
 - **API-01**: Async Neon Postgres integration (`asyncpg` + SQLAlchemy 2.0, `-pooler` URL, `pool_size=3`, `max_overflow=2`).
 - **API-02**: `POST /api/v1/optimize` returns `202 Accepted` with `job_id`; `GET /api/v1/optimize/{job_id}/stream` streams progress and final packing diff via SSE.
 - **API-03**: In-memory TTL cache (`cachetools`) for AWS EC2 pricing profiles and baseline naive `kube-scheduler` simulation.
+- **SCALE-01**: Define `JobBus`, `BlobStore`, and `RateLimiter` `typing.Protocol` seams + `tenant_id` column in DB models so $0 single-container adapters swap cleanly to SQS/Redis/S3 at 1M-user scale.
 
 ### Frontend Dashboard
 - **UI-01**: Interactive Node Packing Grid showing EC2 instances (`c6g.xlarge`, `m5.large`, etc.), Spot/On-Demand badges, and pod blocks with CPU/Memory fill bars.
